@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+blueberry/
 
 # Spyder project settings
 .spyderproject
