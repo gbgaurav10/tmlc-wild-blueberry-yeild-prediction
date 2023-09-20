@@ -1,1 +1,4 @@
-key: value
+ExtraTreesRegressor:
+  n_estimators: 500
+  max_depth: 11
+  min_samples_split: 2
