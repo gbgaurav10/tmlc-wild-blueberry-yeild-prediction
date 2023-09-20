@@ -1,82 +1,63 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd 
-import joblib 
-import warnings 
+import pickle
+import joblib
+from wild_blueberry.pipeline.predictions import PredictionPipeline
+import warnings
 warnings.filterwarnings("ignore")
 
 
-# Load the Model
-model = joblib.load("final_model/wildblueberry_model.joblib")
+# Load the model
+model = joblib.load("final_model/model.joblib")
 
-# Load the Preprocessor
+# Load the preprocessor
 preprocessor = joblib.load("final_model/preprocessor.joblib")
 
 
-# Define the main function
+
 def main():
-    # Set page title and layout
-    st.set_page_config(page_title="Wild Blue-Berry Yield Prediction", layout="wide")
+    st.title('Wild Blue-Berry Prediction WebApp')
 
-    st.title("Wild Blue-Berry Yield Prediction App")
-
-    # Define form inputs and initial values
-    clonesize = st.slider("Clonesize", 10.0, 40.0, step=1)
-
-    honeybee = st.slider("Honeybee", 0.0, 19.0, step=0.1)
-    bumbles = st.slider("Bumbles", 0.0, 0.60, step=0.1)
-    andrena = st.slider("Andrena", 0.0, 0.90, step=0.1)
-    osmia = st.slider("Osmia", 0.0, 0.90, step=0.1)
-    MaxOfUpperTRange = st.slider("MaxOfUpperTRange", 60.0, 100, step=0.10)
-    Rainingdays = st.slider("Rainingdays", 1.0, 35.0, step=1)
-    fruitset = st.slider("Fruitset", 0.10, 0.70, step=0.1)
+    clonesize = st.slider('clonesize', 10.0, 40.0, step=1.0)
+    honeybee = st.slider('Honeybee', 0.0, 19.0, step=0.1)
+    bumbles = st.slider('Bumbles', 0.0, 0.60, step=0.01)
+    andrena = st.slider('Andrena', 0.0, 0.75, step=0.1)
+    osmia = st.slider('Osmia', 0.0, 0.75, step=0.1)
+    MaxOfUpperTRange = st.slider('MaxOfUpperTRange', 69, 95, step=0.1)
+    RainingDays = st.slider('RainingDays', 1.0, 35.0, step=0.1)
+    fruitset = st.slider('Fruitset', 0.19, 0.68, step=0.1)
 
     # Define the form
-    with st.form("Income_inequality_form"):
+    with st.form("Wild-Blue_Berry"):
         # Add submit button inside the form
         submit_button = st.form_submit_button("Submit")
+    
 
-        # If submit button is clicked
-        if submit_button:
-            try:
-                # Create a DataFrame with the selected features
-                input_data = pd.DataFrame({
-                    "clonesize": [clonesize],
-                    "honeybee": [honeybee],
-                    "bumbles": [bumbles],
-                    "andrena": [andrena],
-                    "osmia": [osmia],
-                    "MaxOfUpperTRange": [MaxOfUpperTRange],
-                    "Rainingdays": [Rainingdays],
-                    "fruitset": [fruitset]
-                })
+    if submit_button:
+        try:
+            # Create a dataframe
+            input_data = pd.DataFrame({
+                "clonesize": [clonesize],
+                "honeybee": [honeybee],
+                "bumbles": [bumbles],
+                "andrena": [andrena],
+                "osmia": [osmia],
+                "MaxOfUpperTRange": [MaxOfUpperTRange],
+                "RainingDays": [RainingDays],
+                "fruitset": [fruitset]
+            })
 
-                # Ensure correct data types for the input features
-                input_data = input_data.astype({
-                    "clonesize": int,
-                    "honeybee": int,
-                    "bumbles": int,
-                    "andrena": float,
-                    "osmia": int,
-                    "MaxOfUpperTRange": float,
-                    "Rainingdays": float,
-                    "fruitset": float
+            # Preprocess the input data
+            X_transformed = preprocessor.transform(input_data)
 
-                })
+            # Make the prediction
+            prediction = model.predict(X_transformed)[0]  # Assuming you want a single prediction
 
-                # Make the prediction
-                X_transformed = preprocessor.transform(input_data)
-                prediction = model.predict(X_transformed)
+            # Display the prediction to the user
+            st.write(f"Predicted Wild Blue-Berry Yield: {prediction}")
 
-                # Map the prediction to human-readable labels
-                Yield = income_mapping.get(prediction[0], "Unknown")
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
 
-                # Show the prediction
-                st.subheader("Prediction:")
-                st.write("The predicted Yield is:", Yield)
-
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-
-# Run the main function
 if __name__ == "__main__":
     main()
