@@ -3,6 +3,7 @@ import urllib.request as request
 import zipfile
 from wild_blueberry import logger
 from wild_blueberry.utils.common import get_size
+from pathlib import Path
 from wild_blueberry.entity.config_entity import DataIngestionConfig
 
 
